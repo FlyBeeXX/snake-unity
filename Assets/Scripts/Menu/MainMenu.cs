@@ -1,13 +1,13 @@
 using System;
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 
 public class MainMenu :  StateMachineBehaviourEx {
 
-    
-
-    
+    private Dictionary<string,object> config; 
+	
+	private string lastState = "lastState";
     
     public enum MainMenuStates {
         NewGame,
@@ -18,9 +18,28 @@ public class MainMenu :  StateMachineBehaviourEx {
 
     // Use this for initialization
     void Start () {
+		Debug.Log("Start");
+		this.config = GameObject.FindGameObjectWithTag("GameController").GetComponent<Configuration>().config;
+		object startState;
+		
+		
+		if (!config.TryGetValue(lastState, out startState))
+		{
+			Debug.Log ("No value present");
+			startState = MainMenuStates.NewGame;
+			this.saveState((MainMenuStates)startState);
+		}
         this.useGUI = true;
-        this.currentState = MainMenuStates.NewGame;
+        currentState = (MainMenuStates)startState;
     }
+	
+	private void saveState(MainMenuStates state)
+	{
+		if (config.ContainsKey(lastState))
+			config.Remove(lastState);
+		config.Add(lastState, state);
+	}
+	
     
     #region New Game
         
@@ -33,6 +52,7 @@ public class MainMenu :  StateMachineBehaviourEx {
     // Use this for State initialization, IEnumerator or void
     void NewGame_EnterState () {
         Debug.Log ("Entering new Game State");
+		this.saveState((MainMenuStates)currentState);
         this.newGameSaveColor = newGameStyle.normal.textColor;
         this.newGameStyle.normal.textColor = Color.red;
     }
@@ -67,6 +87,7 @@ public class MainMenu :  StateMachineBehaviourEx {
         public GUIStyle loadGameStyle;
         private Color loadGameSaveColor;
         void LoadGame_EnterState () {
+			this.saveState((MainMenuStates)currentState);
             loadGameSaveColor = loadGameStyle.normal.textColor;
             loadGameStyle.normal.textColor = Color.green;
             Debug.Log ("Entering LoadGame State");
@@ -97,6 +118,8 @@ public class MainMenu :  StateMachineBehaviourEx {
         public GUIStyle settingsStyle;
         private Color settingsSaveColor;
         void Settings_EnterState () {
+		
+			this.saveState((MainMenuStates)currentState);
             settingsSaveColor = settingsStyle.normal.textColor;
             settingsStyle.normal.textColor = Color.blue;
             Debug.Log ("Entering Settings State");
@@ -124,6 +147,7 @@ public class MainMenu :  StateMachineBehaviourEx {
         public GUIStyle exitStyle;
         private Color exitSaveColor;
         void Exit_EnterState () {
+			this.saveState((MainMenuStates)currentState);
             exitSaveColor = exitStyle.normal.textColor;
             exitStyle.normal.textColor = Color.blue;
             Debug.Log ("Entering Exit State");
