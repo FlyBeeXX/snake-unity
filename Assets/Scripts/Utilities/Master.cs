@@ -99,10 +99,15 @@ public class Master : StateMachineBehaviourEx {
 	
 #region Paused
 	private MenuPaused _menupaused = null;
+	
+	public bool isPaused() {
+		return (MasterStates)this.currentState == MasterStates.Paused;
+	}
 	void Paused_EnterState () {
 
 		Time.timeScale = 0; // Pause the game
 		this._menupaused.enabled = true;
+		
 	}
 	void Paused_Update() {
 		if (Input.GetKeyUp(KeyCode.Escape))

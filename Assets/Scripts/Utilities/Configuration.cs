@@ -5,6 +5,8 @@ using System.Collections.Generic;
 public class Configuration : MonoBehaviour {
 	
 	public static Configuration Instance;
+	
+	public int GridSize = 100;
 	public static Dictionary<string, object> config = new Dictionary<string, object>();
 	
 	
