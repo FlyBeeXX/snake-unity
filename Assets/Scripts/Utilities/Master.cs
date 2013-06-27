@@ -123,10 +123,21 @@ public class Master : StateMachineBehaviourEx {
 	}
 	
 	void Exiting_EnterState () {
-		Debug.Log ("Exiting");
-		Application.Quit();
+		Debug.Log ("Showing Credits");
+		countdown = 10;
+		Application.LoadLevel(GameScenes.Credits.ToString());
+		StartCoroutine(Countdown());
+		
 	}
 	void Exiting_Update() {
+		if (countdown == 0 || Input.GetKeyUp(KeyCode.Escape) || Input.GetKeyUp(KeyCode.Return))
+		{
+			Debug.Log ("Quitting the Application");
+			Application.Quit();
+			// Does not quit in editor
+			countdown = -1;
+		}
+		
 
 	}
 	void Exiting_ExitState () {
