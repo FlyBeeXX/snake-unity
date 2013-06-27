@@ -3,17 +3,17 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-public class MainMenu :  StateMachineBehaviourEx {
+public class MenuPaused :  StateMachineBehaviourEx {
 
     private Dictionary<string,object> config; 
 	
-	private string lastState = "lastMainMenuState";
+	private string lastState = "lastMainPausedState";
 	
 	private Master master;
 
     
-    public enum MainMenuStates {
-        NewGame,
+    public enum MainPausedStates {
+        Continue,
         LoadGame,
         Settings,
         Exit
@@ -30,14 +30,14 @@ public class MainMenu :  StateMachineBehaviourEx {
 		
 		if (!config.TryGetValue(lastState, out startState))
 		{
-			startState = MainMenuStates.NewGame;
-			this.saveState((MainMenuStates)startState);
+			startState = MainPausedStates.Continue;
+			this.saveState((MainPausedStates)startState);
 		}
         this.useGUI = true;
-        currentState = (MainMenuStates)startState;
+        currentState = (MainPausedStates)startState;
     }
 	
-	private void saveState(MainMenuStates state)
+	private void saveState(MainPausedStates state)
 	{
 		if (config.ContainsKey(lastState))
 			config.Remove(lastState);
@@ -65,38 +65,37 @@ public class MainMenu :  StateMachineBehaviourEx {
     
     #region New Game
         
-    public Rect newGameRect = new Rect(0,40,200,30);
+    public Rect continueRect = new Rect(0,40,200,30);
     
-    public string newGameString = "New Game";
-    public GUIStyle newGameStyle;
+    public string continueString = "Continue";
+    public GUIStyle continueStyle;
 	
-    private Color newGameSaveColor;
+    private Color continueSaveColor;
     // Use this for State initialization, IEnumerator or void
-    void NewGame_EnterState () {
+    void Continue_EnterState () {
         
-		this.saveState((MainMenuStates)currentState);
-        this.newGameSaveColor = newGameStyle.normal.textColor;
-        this.newGameStyle.normal.textColor = Color.red;
+		this.saveState((MainPausedStates)currentState);
+        this.continueSaveColor = continueStyle.normal.textColor;
+        this.continueStyle.normal.textColor = Color.red;
     }
     
     
     
-    void NewGame_Update() {
+    void Continue_Update() {
         if(this.pressedUp())
-            currentState = MainMenuStates.Exit;
+            currentState = MainPausedStates.Exit;
             
         if(this.pressedDown())
-            currentState = MainMenuStates.LoadGame;
+            currentState = MainPausedStates.LoadGame;
 		if (this.pressedEnter())
 		{
-			Application.LoadLevel (GameScenes.Snake.ToString());
 			master.theGameJustStarted();
 		}
 
             
     }
-    void NewGame_ExitState () {
-        this.newGameStyle.normal.textColor = this.newGameSaveColor;
+    void Continue_ExitState () {
+        this.continueStyle.normal.textColor = this.continueSaveColor;
         
     }
 	
@@ -111,7 +110,7 @@ public class MainMenu :  StateMachineBehaviourEx {
         public GUIStyle loadGameStyle;
         private Color loadGameSaveColor;
         void LoadGame_EnterState () {
-			this.saveState((MainMenuStates)currentState);
+			this.saveState((MainPausedStates)currentState);
             loadGameSaveColor = loadGameStyle.normal.textColor;
             loadGameStyle.normal.textColor = Color.green;
             
@@ -120,9 +119,9 @@ public class MainMenu :  StateMachineBehaviourEx {
 //          Debug.Log ("LoadGame Update");
 
             if(this.pressedUp())
-                currentState = MainMenuStates.NewGame;
+                currentState = MainPausedStates.Continue;
             if(this.pressedDown())
-                currentState = MainMenuStates.Settings;
+                currentState = MainPausedStates.Settings;
 
                 
         }
@@ -143,16 +142,16 @@ public class MainMenu :  StateMachineBehaviourEx {
         void Settings_EnterState () {
 			if (!this._settings)
 				this._settings = this.gameObject.GetComponent<Settings>();
-			this.saveState((MainMenuStates)currentState);
+			this.saveState((MainPausedStates)currentState);
             settingsSaveColor = settingsStyle.normal.textColor;
             settingsStyle.normal.textColor = Color.blue;
             
         }
         void Settings_Update() {
                 if(this.pressedUp())
-                    currentState = MainMenuStates.LoadGame;
+                    currentState = MainPausedStates.LoadGame;
                 if(this.pressedDown())
-                    currentState = MainMenuStates.Exit;
+                    currentState = MainPausedStates.Exit;
 				if (this.pressedEnter()) {
 					this._settings.enabled = true;
 					Configuration.lastMenu = ()=> {
@@ -160,7 +159,6 @@ public class MainMenu :  StateMachineBehaviourEx {
 						this._settings.enabled = false;
 					};
 					this.enabled = false;
-//					Application.LoadLevel(GameScenes.Settings.ToString());
 				}
         }
         void Settings_ExitState () {
@@ -176,16 +174,16 @@ public class MainMenu :  StateMachineBehaviourEx {
         public GUIStyle exitStyle;
         private Color exitSaveColor;
         void Exit_EnterState () {
-			this.saveState((MainMenuStates)currentState);
+			this.saveState((MainPausedStates)currentState);
             exitSaveColor = exitStyle.normal.textColor;
             exitStyle.normal.textColor = Color.blue;
             
         }
         void Exit_Update() {
                 if(this.pressedUp())
-                    currentState = MainMenuStates.Settings;
+                    currentState = MainPausedStates.Settings;
                 if(this.pressedDown())
-                    currentState = MainMenuStates.NewGame;
+                    currentState = MainPausedStates.Continue;
 				if (this.pressedEnter())
 					Application.Quit();
         }
@@ -196,7 +194,7 @@ public class MainMenu :  StateMachineBehaviourEx {
     #endregion
     void updateRects ()
     {
-        this.newGameRect.x = Screen.width/2 - this.newGameRect.width/2;
+        this.continueRect.x = Screen.width/2 - this.continueRect.width/2;
         this.loadGameRect.x = Screen.width/2 - this.loadGameRect.width/2;
         this.settingsRect.x = Screen.width/2 - this.settingsRect.width/2;
         this.exitRect.x = Screen.width/2 - this.exitRect.width/2;
@@ -207,7 +205,7 @@ public class MainMenu :  StateMachineBehaviourEx {
     void OnGUI()
     {
         this.updateRects();
-        GUI.Box (this.newGameRect, this.newGameString, this.newGameStyle    );
+        GUI.Box (this.continueRect, this.continueString, this.continueStyle    );
         GUI.Box (this.loadGameRect, this.loadGameString, this.loadGameStyle    );        
         GUI.Box (this.settingsRect, this.settingsString, this.settingsStyle    );
         GUI.Box (this.exitRect, this.exitString, this.exitStyle    );

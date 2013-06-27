@@ -14,25 +14,26 @@ public class Settings : StateMachineBehaviourEx {
 	
 	
 	#region Exit
-        public Rect exitRect = new Rect(0,160,200,30);
+        private Rect exitRect = new Rect(0,Screen.height*4/5,200,30);
         public string exitString = "Back to Main Menu";
     
         public GUIStyle exitStyle;
         private Color exitSaveColor;
+	
+		private MainMenu _mainmenu = null;
         void Exit_EnterState () {
+			if (!_mainmenu)
+				this._mainmenu = this.gameObject.GetComponent<MainMenu>();
             exitSaveColor = exitStyle.normal.textColor;
             exitStyle.normal.textColor = Color.red;
         }
         void Exit_Update() {
-//                bool up = Input.GetKeyUp(KeyCode.UpArrow);
-//                if(up)
-//                    currentState = MainMenuStates.Settings;
-//                bool down = Input.GetKeyUp(KeyCode.DownArrow);
-//                if(down)
-//                    currentState = MainMenuStates.NewGame;
-				bool enter = Input.GetKeyUp (KeyCode.Return) || Input.GetKeyUp (KeyCode.KeypadEnter);
-				if (enter)
-					Application.LoadLevel(GameScenes.MainMenu.ToString());
+			bool enter = Input.GetKeyUp (KeyCode.Return) || Input.GetKeyUp (KeyCode.KeypadEnter);
+			if (enter)
+			{
+				Configuration.lastMenu();
+//				Application.LoadLevel(GameScenes.MainMenu.ToString());
+			}
         }
         void Exit_ExitState () {
             exitStyle.normal.textColor = this.exitSaveColor;
@@ -48,7 +49,11 @@ public class Settings : StateMachineBehaviourEx {
 	void OnGUI()
 	{
 		this.updateRectangles();
-		GUI.Box(new Rect(10,10,200,50), "Test New Scene");
+		GUIStyle style = new GUIStyle(GUI.skin.box);
+		style.fontStyle = FontStyle.Bold;
+		style.alignment = TextAnchor.MiddleCenter;
+		style.fontSize = 30;
+		GUI.Box(new Rect(Screen.width/5,Screen.height/2,Screen.width*3/5,50), "OVER 9000 SETTINGS!!", style);
 		GUI.Box(exitRect, exitString, exitStyle);
 		
 		
