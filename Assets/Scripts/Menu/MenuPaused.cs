@@ -154,7 +154,7 @@ public class MenuPaused :  StateMachineBehaviourEx {
                     currentState = MainPausedStates.Exit;
 				if (this.pressedEnter()) {
 					this._settings.enabled = true;
-					Configuration.lastMenu = ()=> {
+					this._settings.lastMenu = ()=> {
 						this.enabled = true;
 						this._settings.enabled = false;
 					};
@@ -185,7 +185,7 @@ public class MenuPaused :  StateMachineBehaviourEx {
                 if(this.pressedDown())
                     currentState = MainPausedStates.Continue;
 				if (this.pressedEnter())
-					Application.Quit();
+					master.Quit();
         }
         void Exit_ExitState () {
             exitStyle.normal.textColor = this.exitSaveColor;

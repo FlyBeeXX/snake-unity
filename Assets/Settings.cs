@@ -1,8 +1,11 @@
 using UnityEngine;
 using System.Collections;
-
+using System;
 public class Settings : StateMachineBehaviourEx {
+	static void DoNothing(){}
 	
+	[HideInInspector]
+	public Action lastMenu = DoNothing;
 	public enum SettingsStates {
 		Exit
 	}
@@ -31,7 +34,7 @@ public class Settings : StateMachineBehaviourEx {
 			bool enter = Input.GetKeyUp (KeyCode.Return) || Input.GetKeyUp (KeyCode.KeypadEnter);
 			if (enter)
 			{
-				Configuration.lastMenu();
+				this.lastMenu();
 //				Application.LoadLevel(GameScenes.MainMenu.ToString());
 			}
         }

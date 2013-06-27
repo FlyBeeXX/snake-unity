@@ -155,7 +155,7 @@ public class MainMenu :  StateMachineBehaviourEx {
                     currentState = MainMenuStates.Exit;
 				if (this.pressedEnter()) {
 					this._settings.enabled = true;
-					Configuration.lastMenu = ()=> {
+					this._settings.lastMenu = ()=> {
 						this.enabled = true;
 						this._settings.enabled = false;
 					};
@@ -187,7 +187,7 @@ public class MainMenu :  StateMachineBehaviourEx {
                 if(this.pressedDown())
                     currentState = MainMenuStates.NewGame;
 				if (this.pressedEnter())
-					Application.Quit();
+					master.Quit();
         }
         void Exit_ExitState () {
             exitStyle.normal.textColor = this.exitSaveColor;

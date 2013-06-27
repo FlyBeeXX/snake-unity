@@ -14,7 +14,8 @@ public class Master : StateMachineBehaviourEx {
 		Starting,
 		Menu,
 		Playing,
-		Paused
+		Paused,
+		Exiting
 	}
 	
 	void Start() {
@@ -45,7 +46,6 @@ public class Master : StateMachineBehaviourEx {
 			if (Application.loadedLevelName != GameScenes.StartingScreen.ToString())
 				Application.LoadLevel(GameScenes.StartingScreen.ToString());
 //			this.OnGUIHandler = this.Starting_OnGUI;
-			Debug.Log ("Entering Starting State");
 			StartCoroutine(this.Countdown());
 		}
 		void Starting_OnGUI() {
@@ -60,7 +60,6 @@ public class Master : StateMachineBehaviourEx {
 		}
 			
 		void Starting_ExitState () {
-			Debug.Log ("Exiting Starting State");
 		}
 #endregion
 	
@@ -75,7 +74,6 @@ public class Master : StateMachineBehaviourEx {
 		}
 		void Menu_ExitState () {
 			this.mainmenu.enabled = false;
-			Debug.Log ("Exiting Menu State");
 		}
 	public void theGameJustStarted(){
 		this.currentState = MasterStates.Playing;
@@ -86,8 +84,6 @@ public class Master : StateMachineBehaviourEx {
 	void Playing_EnterState () {
 		this.mainmenu.enabled = false;
 		this._menupaused.enabled = false;
-		
-		Debug.Log ("Entering Playing State");
 	}
 	void Playing_Update() {
 		
@@ -107,20 +103,34 @@ public class Master : StateMachineBehaviourEx {
 
 		Time.timeScale = 0; // Pause the game
 		this._menupaused.enabled = true;
-//		Application.LoadLevel(GameScenes.MainMenu.ToString());
-		
-		Debug.Log ("Entering Paused State");
 	}
 	void Paused_Update() {
+		if (Input.GetKeyUp(KeyCode.Escape))
+			this.currentState = MasterStates.Playing;
 
 	}
 	void Paused_ExitState () {
 		this._menupaused.enabled = false;
-		Debug.Log ("Exiting Paused State");
+		Time.timeScale = 1;
 	}
 #endregion
 	
 	
+#region Exiting
 	
+	public void Quit() {
+		this.currentState = MasterStates.Exiting;
+	}
+	
+	void Exiting_EnterState () {
+		Debug.Log ("Exiting");
+		Application.Quit();
+	}
+	void Exiting_Update() {
+
+	}
+	void Exiting_ExitState () {
+	}
+#endregion
 	
 }
