@@ -7,7 +7,9 @@ public class MainMenu :  StateMachineBehaviourEx {
 
     private Dictionary<string,object> config; 
 	
-	private string lastState = "lastState";
+	private string lastState = "lastMainMenuState";
+	
+	private Master master;
     
     public enum MainMenuStates {
         NewGame,
@@ -15,17 +17,18 @@ public class MainMenu :  StateMachineBehaviourEx {
         Settings,
         Exit
     }
+	
+
 
     // Use this for initialization
     void Start () {
-		Debug.Log("Start");
 		this.config = GameObject.FindGameObjectWithTag("GameController").GetComponent<Configuration>().config;
+		this.master = GameObject.FindGameObjectWithTag("GameController").GetComponent<Master>();
 		object startState;
 		
 		
 		if (!config.TryGetValue(lastState, out startState))
 		{
-			Debug.Log ("No value present");
 			startState = MainMenuStates.NewGame;
 			this.saveState((MainMenuStates)startState);
 		}
@@ -40,6 +43,24 @@ public class MainMenu :  StateMachineBehaviourEx {
 		config.Add(lastState, state);
 	}
 	
+	
+	#region Helpers
+	
+	private bool pressedEnter()
+	{
+		return Input.GetKeyUp (KeyCode.Return) || Input.GetKeyUp (KeyCode.KeypadEnter);
+	}
+	
+
+	private bool pressedDown()
+	{
+		return Input.GetKeyUp(KeyCode.DownArrow);
+	}
+	private bool pressedUp()
+	{
+		return Input.GetKeyUp(KeyCode.UpArrow);
+	}
+	#endregion
     
     #region New Game
         
@@ -51,7 +72,7 @@ public class MainMenu :  StateMachineBehaviourEx {
     private Color newGameSaveColor;
     // Use this for State initialization, IEnumerator or void
     void NewGame_EnterState () {
-        Debug.Log ("Entering new Game State");
+        
 		this.saveState((MainMenuStates)currentState);
         this.newGameSaveColor = newGameStyle.normal.textColor;
         this.newGameStyle.normal.textColor = Color.red;
@@ -60,20 +81,22 @@ public class MainMenu :  StateMachineBehaviourEx {
     
     
     void NewGame_Update() {
-//      Debug.Log ("NewGame Update");
-            bool up = Input.GetKeyUp(KeyCode.UpArrow);
-            if(up)
-                currentState = MainMenuStates.Exit;
-                
-            bool down = Input.GetKeyUp(KeyCode.DownArrow);
-            if(down)
-                currentState = MainMenuStates.LoadGame;
+        if(this.pressedUp())
+            currentState = MainMenuStates.Exit;
+            
+        if(this.pressedDown())
+            currentState = MainMenuStates.LoadGame;
+		if (this.pressedEnter())
+		{
+			Application.LoadLevel (GameScenes.Snake.ToString());
+			master.theGameJustStarted();
+		}
 
             
     }
     void NewGame_ExitState () {
-        newGameStyle.normal.textColor = this.newGameSaveColor;
-        Debug.Log ("Exiting new Game State");
+        this.newGameStyle.normal.textColor = this.newGameSaveColor;
+        
     }
 	
     
@@ -90,23 +113,21 @@ public class MainMenu :  StateMachineBehaviourEx {
 			this.saveState((MainMenuStates)currentState);
             loadGameSaveColor = loadGameStyle.normal.textColor;
             loadGameStyle.normal.textColor = Color.green;
-            Debug.Log ("Entering LoadGame State");
+            
         }
         void LoadGame_Update() {
 //          Debug.Log ("LoadGame Update");
 
-            bool up = Input.GetKeyUp(KeyCode.UpArrow);
-            if(up)
+            if(this.pressedUp())
                 currentState = MainMenuStates.NewGame;
-            bool down = Input.GetKeyUp(KeyCode.DownArrow);
-            if(down)
+            if(this.pressedDown())
                 currentState = MainMenuStates.Settings;
 
                 
         }
         void LoadGame_ExitState () {
             loadGameStyle.normal.textColor = this.loadGameSaveColor;
-            Debug.Log ("Exiting LoadGame State");
+            
         }
 
     #endregion
@@ -122,22 +143,19 @@ public class MainMenu :  StateMachineBehaviourEx {
 			this.saveState((MainMenuStates)currentState);
             settingsSaveColor = settingsStyle.normal.textColor;
             settingsStyle.normal.textColor = Color.blue;
-            Debug.Log ("Entering Settings State");
+            
         }
         void Settings_Update() {
-                bool up = Input.GetKeyUp(KeyCode.UpArrow);
-                if(up)
+                if(this.pressedUp())
                     currentState = MainMenuStates.LoadGame;
-                bool down = Input.GetKeyUp(KeyCode.DownArrow);
-                if(down)
+                if(this.pressedDown())
                     currentState = MainMenuStates.Exit;
-				bool enter = Input.GetKeyUp (KeyCode.Return) || Input.GetKeyUp (KeyCode.KeypadEnter);
-				if (enter)
-					Application.LoadLevel("Settings");
+				if (this.pressedEnter())
+					Application.LoadLevel(GameScenes.Settings.ToString());
         }
         void Settings_ExitState () {
             settingsStyle.normal.textColor = this.settingsSaveColor;
-            Debug.Log ("Exiting Settings State");
+            
         }
     #endregion
     #region Exit
@@ -150,19 +168,19 @@ public class MainMenu :  StateMachineBehaviourEx {
 			this.saveState((MainMenuStates)currentState);
             exitSaveColor = exitStyle.normal.textColor;
             exitStyle.normal.textColor = Color.blue;
-            Debug.Log ("Entering Exit State");
+            
         }
         void Exit_Update() {
-                bool up = Input.GetKeyUp(KeyCode.UpArrow);
-                if(up)
+                if(this.pressedUp())
                     currentState = MainMenuStates.Settings;
-                bool down = Input.GetKeyUp(KeyCode.DownArrow);
-                if(down)
+                if(this.pressedDown())
                     currentState = MainMenuStates.NewGame;
+				if (this.pressedEnter())
+					Application.Quit();
         }
         void Exit_ExitState () {
             exitStyle.normal.textColor = this.exitSaveColor;
-            Debug.Log ("Exiting Exit State");
+            
         }
     #endregion
     void updateRects ()

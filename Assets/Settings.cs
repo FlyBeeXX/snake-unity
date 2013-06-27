@@ -22,7 +22,6 @@ public class Settings : StateMachineBehaviourEx {
         void Exit_EnterState () {
             exitSaveColor = exitStyle.normal.textColor;
             exitStyle.normal.textColor = Color.red;
-            Debug.Log ("Entering Exit State");
         }
         void Exit_Update() {
 //                bool up = Input.GetKeyUp(KeyCode.UpArrow);
@@ -33,11 +32,10 @@ public class Settings : StateMachineBehaviourEx {
 //                    currentState = MainMenuStates.NewGame;
 				bool enter = Input.GetKeyUp (KeyCode.Return) || Input.GetKeyUp (KeyCode.KeypadEnter);
 				if (enter)
-					Application.LoadLevel("MainMenu");
+					Application.LoadLevel(GameScenes.MainMenu.ToString());
         }
         void Exit_ExitState () {
             exitStyle.normal.textColor = this.exitSaveColor;
-            Debug.Log ("Exiting Exit State");
         }
     #endregion
 	
