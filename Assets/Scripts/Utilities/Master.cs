@@ -65,11 +65,12 @@ public class Master : StateMachineBehaviourEx {
 #region Menu
 		private MainMenu _mainmenu = null;
 		void Menu_EnterState () {
-
+		
 			this._mainmenu.Show();
 		}
 		void Menu_Update() {
-
+			if (snakeloaded)
+				snakeloaded = false;
 		}
 		void Menu_ExitState () {
 		}
@@ -79,12 +80,23 @@ public class Master : StateMachineBehaviourEx {
 #endregion
 	
 #region Playing
+	private SnakeMover2 mover;
+	private bool snakeloaded = false;
+	public void snakeLoaded() {
+		snakeloaded = true;
+	}
 	void Playing_EnterState () {
 		this._mainmenu.Hide();
 		this._menupaused.Hide();
+		
+
 	}
 	void Playing_Update() {
-		
+		if (snakeloaded) 
+		{
+			snakeloaded = false;
+			GameObject.FindGameObjectWithTag("Snake").GetComponent<SnakeMover2>().StartMoving();
+		}
 		if (Input.GetKeyUp(KeyCode.Escape))
 			this.currentState = MasterStates.Paused;
 
