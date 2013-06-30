@@ -7,7 +7,6 @@ using UnityEngine;
 public class Master : StateMachineBehaviourEx {
 	public static Master Instance;
 	private Dictionary<string,object> config; 
-	
 
 	
 	public enum MasterStates {

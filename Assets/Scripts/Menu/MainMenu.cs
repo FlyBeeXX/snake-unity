@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-public class MainMenu :  StateMachineBehaviourEx {
+public partial class MainMenu :  StateMachineBehaviourEx {
 
     private Dictionary<string,object> config; 
 	
@@ -16,6 +16,7 @@ public class MainMenu :  StateMachineBehaviourEx {
         NewGame,
         LoadGame,
         Settings,
+		ShowSettings,
         Exit
     }
 	
@@ -43,6 +44,7 @@ public class MainMenu :  StateMachineBehaviourEx {
 			config.Remove(lastState);
 		config.Add(lastState, state);
 	}
+
 	
 	
 	#region Helpers
@@ -63,111 +65,74 @@ public class MainMenu :  StateMachineBehaviourEx {
 	}
 	#endregion
     
-    #region New Game
-        
-    public Rect newGameRect = new Rect(0,40,200,30);
-    
-    public string newGameString = "New Game";
-    public GUIStyle newGameStyle;
+   
 	
-    private Color newGameSaveColor;
-    // Use this for State initialization, IEnumerator or void
-    void NewGame_EnterState () {
-        
-		this.saveState((MainMenuStates)currentState);
-        this.newGameSaveColor = newGameStyle.normal.textColor;
-        this.newGameStyle.normal.textColor = Color.red;
-    }
-    
-    
-    
-    void NewGame_Update() {
-        if(this.pressedUp())
-            currentState = MainMenuStates.Exit;
-            
-        if(this.pressedDown())
-            currentState = MainMenuStates.LoadGame;
-		if (this.pressedEnter())
-		{
-			Application.LoadLevel (GameScenes.Snake.ToString());
-			master.theGameJustStarted();
-		}
-
-            
-    }
-    void NewGame_ExitState () {
-        this.newGameStyle.normal.textColor = this.newGameSaveColor;
-        
-    }
-	
-    
-    
-    #endregion
 
     #region LoadGame
-        public Rect loadGameRect = new Rect(0,80,200,30);
-        public string loadGameString = "Load Game";
-    
-        public GUIStyle loadGameStyle;
-        private Color loadGameSaveColor;
-        void LoadGame_EnterState () {
-			this.saveState((MainMenuStates)currentState);
-            loadGameSaveColor = loadGameStyle.normal.textColor;
-            loadGameStyle.normal.textColor = Color.green;
-            
-        }
-        void LoadGame_Update() {
+    public Rect loadGameRect = new Rect(0,80,200,30);
+    public string loadGameString = "Load Game";
+
+    public GUIStyle loadGameStyle;
+    private Color loadGameSaveColor;
+    void LoadGame_EnterState () {
+		this.saveState((MainMenuStates)currentState);
+        loadGameSaveColor = loadGameStyle.normal.textColor;
+        loadGameStyle.normal.textColor = Color.green;
+        
+    }
+    void LoadGame_Update() {
 //          Debug.Log ("LoadGame Update");
 
-            if(this.pressedUp())
-                currentState = MainMenuStates.NewGame;
-            if(this.pressedDown())
-                currentState = MainMenuStates.Settings;
+        if(this.pressedUp())
+            currentState = MainMenuStates.NewGame;
+        if(this.pressedDown())
+            currentState = MainMenuStates.Settings;
 
-                
-        }
-        void LoadGame_ExitState () {
-            loadGameStyle.normal.textColor = this.loadGameSaveColor;
             
-        }
+    }
+    void LoadGame_ExitState () {
+        loadGameStyle.normal.textColor = this.loadGameSaveColor;
+        
+    }
+	
+	void LoadGame_OnGUI() {
+			drawMenu();
+	}
 
     #endregion
     
     #region Settings
-        public Rect settingsRect = new Rect(0,120,200,30);
-        public string settingsString = "Settings";
+    public Rect settingsRect = new Rect(0,120,200,30);
+    public string settingsString = "Settings";
 //		private string 
-    	private Settings _settings = null;
-        public GUIStyle settingsStyle;
-        private Color settingsSaveColor;
-        void Settings_EnterState () {
-			if (!this._settings)
-				this._settings = this.gameObject.GetComponent<Settings>();
-			this.saveState((MainMenuStates)currentState);
-            settingsSaveColor = settingsStyle.normal.textColor;
-            settingsStyle.normal.textColor = Color.blue;
-            
-        }
-        void Settings_Update() {
-                if(this.pressedUp())
-                    currentState = MainMenuStates.LoadGame;
-                if(this.pressedDown())
-                    currentState = MainMenuStates.Exit;
-				if (this.pressedEnter()) {
-					this._settings.enabled = true;
-					this._settings.lastMenu = ()=> {
-						this.enabled = true;
-						this._settings.enabled = false;
-					};
-					this.enabled = false;
-//					Application.LoadLevel(GameScenes.Settings.ToString());
-				}
-        }
-        void Settings_ExitState () {
-			this._settings.enabled = false;
-            settingsStyle.normal.textColor = this.settingsSaveColor;
-            
-        }
+	private Settings _settings = null;
+    public GUIStyle settingsStyle;
+    private Color settingsSaveColor;
+    void Settings_EnterState () {
+		if (!this._settings)
+			this._settings = this.gameObject.GetComponent<Settings>();
+		this.saveState((MainMenuStates)currentState);
+        settingsSaveColor = settingsStyle.normal.textColor;
+        settingsStyle.normal.textColor = Color.blue;
+        
+    }
+    void Settings_Update() {
+            if(this.pressedUp())
+                currentState = MainMenuStates.LoadGame;
+            if(this.pressedDown())
+                currentState = MainMenuStates.Exit;
+			if (this.pressedEnter()) {
+				this.SetState(Settings.SettingsStates.Exit, _settings);
+			}
+    }
+    void Settings_ExitState () {
+		this._settings.enabled = false;
+        settingsStyle.normal.textColor = this.settingsSaveColor;
+        
+    }
+	void Settings_OnGUI() {
+		drawMenu();
+	}
     #endregion
     #region Exit
         public Rect exitRect = new Rect(0,160,200,30);
@@ -193,6 +158,9 @@ public class MainMenu :  StateMachineBehaviourEx {
             exitStyle.normal.textColor = this.exitSaveColor;
             
         }
+	void Exit_OnGUI() {
+		drawMenu();
+	}
     #endregion
     void updateRects ()
     {
@@ -201,16 +169,15 @@ public class MainMenu :  StateMachineBehaviourEx {
         this.settingsRect.x = Screen.width/2 - this.settingsRect.width/2;
         this.exitRect.x = Screen.width/2 - this.exitRect.width/2;
     }
-    
-    
-    
-    void OnGUI()
-    {
+	
+	void drawMenu(){
         this.updateRects();
         GUI.Box (this.newGameRect, this.newGameString, this.newGameStyle    );
         GUI.Box (this.loadGameRect, this.loadGameString, this.loadGameStyle    );        
         GUI.Box (this.settingsRect, this.settingsString, this.settingsStyle    );
         GUI.Box (this.exitRect, this.exitString, this.exitStyle    );
-    }
+	}
+    
+ 
     
 }

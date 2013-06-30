@@ -154,10 +154,6 @@ public class MenuPaused :  StateMachineBehaviourEx {
                     currentState = MainPausedStates.Exit;
 				if (this.pressedEnter()) {
 					this._settings.enabled = true;
-					this._settings.lastMenu = ()=> {
-						this.enabled = true;
-						this._settings.enabled = false;
-					};
 					this.enabled = false;
 				}
         }

@@ -6,35 +6,45 @@ public class Credits : MonoBehaviour {
 	
 	
 	private Rect mainRect = new Rect (Screen.width / 2 - 400, Screen.height / 2 - 300, 800, 600);
+	public float verticalChange = 0.1f;
+	public float moveWait = 0.3f;
+	
+	public GUIStyle textStyle;
 	
 	
-	public string[] _credits;// = {" Developer: Gabriel Nadler", "Art: Dominik Würsch"};
+	private bool started = false;
+	
+
+	
+	private float offset = 0;
+	
+	public string[] _credits = {" Developer: Gabriel Nadler"};
 
 	// Use this for initialization
 	void Start () {
-		_credits = new string[2];
-		_credits[0] = "Developer: Gabriel Nadler";
-		_credits[1] = "Art: Dominik Würsch";
-		Debug.Log (_credits[0]);
-		Debug.Log (_credits[1]);
-		foreach (string credit in _credits)
-			Debug.Log(credit);
+	}
+	
+	IEnumerator moveUp()
+	{
+		this.started = true;
+		while(true)
+		{
+			offset += verticalChange;
+			yield return new WaitForSeconds(moveWait);
+		}
 		
 	}
 	
 	// Update is called once per frame
 	void OnGUI () {
-		GUIStyle style = new GUIStyle();//GUI.skin.box);
-		style.alignment = TextAnchor.MiddleCenter;
-		style.fontSize = 30;
-		style.normal.textColor = Color.white;
-		style.border = new RectOffset(0,0,0,0);
-//		GUI.BeginGroup(this.mainRect);
-		int counter = 0;
+		GUI.BeginGroup(this.mainRect);
+		int counter = 01;
+		if (!this.started)
+			StartCoroutine(moveUp());
 		foreach (string credit in _credits) {
-			GUI.Box (new Rect (Screen.width/2-400,200+50*counter,800,50),credit,style);
+			GUI.Box (new Rect (this.mainRect.width/2-200,this.mainRect.height-50*counter-offset,400,50),credit,this.textStyle);
 			counter++;
 		}
-//		GUI.EndGroup();
+		GUI.EndGroup();
 	}
 }
