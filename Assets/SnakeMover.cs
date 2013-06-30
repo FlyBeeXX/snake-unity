@@ -134,10 +134,13 @@ public class SnakeMover : StateMachineBehaviourEx {
 		
 	}
 	void Moving_Update () {
-		this.changeDirection();
-
-
-		_transform.position = this.newPos(_transform.position,this.nextStep());
+		if (Time.timeScale > 0)
+		{
+			this.changeDirection();
+	
+	
+			_transform.position = this.newPos(_transform.position,this.nextStep());
+		}
 	}
 	private bool atWall=false;
 	void Moving_OnGUI() {

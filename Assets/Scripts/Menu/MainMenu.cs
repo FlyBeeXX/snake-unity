@@ -1,92 +1,96 @@
-using System;
 using UnityEngine;
-using System.Collections.Generic;
+using System.Collections;
 
+public class MainMenu : BaseMenuWithSettings
+{
 
-public partial class MainMenu :  StateMachineBehaviourEx {
-
-    private Dictionary<string,object> config; 
+   public enum MainMenuStates {
+	    NewGame,
+	    LoadGame,
+	    Settings,
+	    Exit,
+		Hidden
+	}
 	
-	private string lastState = "lastMainMenuState";
+	public void Show() {
+		this.currentState = MainMenuStates.NewGame;
+	}
+	public void Hide() {
+		this.currentState = MainMenuStates.Hidden;
+	}
 	
-	private Master master;
+	
+	
+	void Start() {
+		base.init();
+		
+		base.Settings_UpHandler = () => currentState = MainMenuStates.LoadGame;
+		base.Settings_DownHandler = () => currentState = MainMenuStates.Exit;
+	}
 
+	
+
+#region New Game
+        
+    public Rect newGameRect = new Rect(0,40,200,30);
     
-    public enum MainMenuStates {
-        NewGame,
-        LoadGame,
-        Settings,
-		ShowSettings,
-        Exit
-    }
+    public string newGameString = "New Game";
+    public GUIStyle newGameStyle;
 	
-
-
-    // Use this for initialization
-    void Start () {
-		this.config = Configuration.config;
-		this.master = GameObject.FindGameObjectWithTag("GameController").GetComponent<Master>();
-		object startState;
-		
-		
-		if (!config.TryGetValue(lastState, out startState))
+    private Color newGameSaveColor;
+    // Use this for State initialization, IEnumerator or void
+    void NewGame_EnterState () {
+       
+        this.newGameSaveColor = newGameStyle.normal.textColor;
+        this.newGameStyle.normal.textColor = Color.red;
+    }
+    
+    
+    
+    void NewGame_Update() {
+        if(this.pressedUp())
+            currentState = MainMenuStates.Exit;
+            
+        if(this.pressedDown())
+            currentState = MainMenuStates.LoadGame;
+		if (this.pressedEnter())
 		{
-			startState = MainMenuStates.NewGame;
-			this.saveState((MainMenuStates)startState);
+			Application.LoadLevel (GameScenes.Snake.ToString());
+			master.theGameJustStarted();
 		}
-        this.useGUI = true;
-        currentState = (MainMenuStates)startState;
+
+            
     }
-	
-	private void saveState(MainMenuStates state)
-	{
-		if (config.ContainsKey(lastState))
-			config.Remove(lastState);
-		config.Add(lastState, state);
-	}
-
-	
-	
-	#region Helpers
-	
-	private bool pressedEnter()
-	{
-		return Input.GetKeyUp (KeyCode.Return) || Input.GetKeyUp (KeyCode.KeypadEnter);
+    void NewGame_ExitState () {
+        this.newGameStyle.normal.textColor = this.newGameSaveColor;
+        
+    }
+	void NewGame_OnGUI() {
+		this.drawMenu();
 	}
 	
-
-	private bool pressedDown()
-	{
-		return Input.GetKeyUp(KeyCode.DownArrow);
-	}
-	private bool pressedUp()
-	{
-		return Input.GetKeyUp(KeyCode.UpArrow);
-	}
-	#endregion
     
-   
-	
+    
+#endregion	
 
-    #region LoadGame
+	
+#region LoadGame
     public Rect loadGameRect = new Rect(0,80,200,30);
     public string loadGameString = "Load Game";
 
     public GUIStyle loadGameStyle;
     private Color loadGameSaveColor;
     void LoadGame_EnterState () {
-		this.saveState((MainMenuStates)currentState);
         loadGameSaveColor = loadGameStyle.normal.textColor;
         loadGameStyle.normal.textColor = Color.green;
         
     }
     void LoadGame_Update() {
-//          Debug.Log ("LoadGame Update");
 
         if(this.pressedUp())
             currentState = MainMenuStates.NewGame;
         if(this.pressedDown())
-            currentState = MainMenuStates.Settings;
+            this.SetState(MainMenuStates.Settings, this);
 
             
     }
@@ -99,39 +103,12 @@ public partial class MainMenu :  StateMachineBehaviourEx {
 			drawMenu();
 	}
 
-    #endregion
-    
-    #region Settings
-    public Rect settingsRect = new Rect(0,120,200,30);
-    public string settingsString = "Settings";
-//		private string 
-	private Settings _settings = null;
-    public GUIStyle settingsStyle;
-    private Color settingsSaveColor;
-    void Settings_EnterState () {
-		if (!this._settings)
-			this._settings = this.gameObject.GetComponent<Settings>();
-		this.saveState((MainMenuStates)currentState);
-        settingsSaveColor = settingsStyle.normal.textColor;
-        settingsStyle.normal.textColor = Color.blue;
-        
-    }
-    void Settings_Update() {
-            if(this.pressedUp())
-                currentState = MainMenuStates.LoadGame;
-            if(this.pressedDown())
-                currentState = MainMenuStates.Exit;
-			if (this.pressedEnter()) {
-				this.SetState(Settings.SettingsStates.Exit, _settings);
-			}
-    }
-    void Settings_ExitState () {
-		this._settings.enabled = false;
-        settingsStyle.normal.textColor = this.settingsSaveColor;
-        
-    }
-	void Settings_OnGUI() {
-		drawMenu();
+#endregion
+
+#region Settings
+	protected override void Settings_OnGUI ()
+	{
+		this.drawMenu();
 	}
     #endregion
     #region Exit
@@ -141,7 +118,6 @@ public partial class MainMenu :  StateMachineBehaviourEx {
         public GUIStyle exitStyle;
         private Color exitSaveColor;
         void Exit_EnterState () {
-			this.saveState((MainMenuStates)currentState);
             exitSaveColor = exitStyle.normal.textColor;
             exitStyle.normal.textColor = Color.blue;
             
@@ -171,13 +147,12 @@ public partial class MainMenu :  StateMachineBehaviourEx {
     }
 	
 	void drawMenu(){
-        this.updateRects();
+		this.updateRects();
+        base.drawSettings();
         GUI.Box (this.newGameRect, this.newGameString, this.newGameStyle    );
-        GUI.Box (this.loadGameRect, this.loadGameString, this.loadGameStyle    );        
-        GUI.Box (this.settingsRect, this.settingsString, this.settingsStyle    );
+        GUI.Box (this.loadGameRect, this.loadGameString, this.loadGameStyle    );
         GUI.Box (this.exitRect, this.exitString, this.exitStyle    );
 	}
     
- 
-    
 }
+

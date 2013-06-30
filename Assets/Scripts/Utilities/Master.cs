@@ -18,7 +18,7 @@ public class Master : StateMachineBehaviourEx {
 	}
 	
 	void Start() {
-		this.mainmenu = this.gameObject.GetComponent<MainMenu>();
+		this._mainmenu = this.gameObject.GetComponent<MainMenu>();
 		this._menupaused = this.gameObject.GetComponent<MenuPaused>();
 		currentState = MasterStates.Starting;
 	}
@@ -63,16 +63,15 @@ public class Master : StateMachineBehaviourEx {
 #endregion
 	
 #region Menu
-		private MainMenu mainmenu = null;
+		private MainMenu _mainmenu = null;
 		void Menu_EnterState () {
 
-			this.mainmenu.enabled = true;
+			this._mainmenu.Show();
 		}
 		void Menu_Update() {
 
 		}
 		void Menu_ExitState () {
-			this.mainmenu.enabled = false;
 		}
 	public void theGameJustStarted(){
 		this.currentState = MasterStates.Playing;
@@ -81,8 +80,8 @@ public class Master : StateMachineBehaviourEx {
 	
 #region Playing
 	void Playing_EnterState () {
-		this.mainmenu.enabled = false;
-		this._menupaused.enabled = false;
+		this._mainmenu.Hide();
+		this._menupaused.Hide();
 	}
 	void Playing_Update() {
 		
@@ -105,7 +104,7 @@ public class Master : StateMachineBehaviourEx {
 	void Paused_EnterState () {
 
 		Time.timeScale = 0; // Pause the game
-		this._menupaused.enabled = true;
+		this._menupaused.Show();
 		
 	}
 	void Paused_Update() {
