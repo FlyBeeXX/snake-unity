@@ -10,6 +10,10 @@ public class SnakeMover2 : StateMachineBehaviourEx
 	private Camera _mainCamera;
 	private Master _master;
 	private Configuration _config;
+	
+	public bool debug = true;
+	
+	public float movingTolerance = 0.06f;
 
 	public enum SnakeMover2States {
 		Paused,
@@ -41,6 +45,7 @@ public class SnakeMover2 : StateMachineBehaviourEx
 		this._transform = gameObject.transform;
 		this._mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 		this._master.snakeLoaded();
+		this._transform.position = new Vector3(-2*_config.GridSize,_transform.position.y, _config.GridSize);
 	}
 #region Input
 	protected bool pressedDown()
@@ -61,165 +66,272 @@ public class SnakeMover2 : StateMachineBehaviourEx
 	}
 #endregion
 
-
+	private bool AtTurningPosition() {
+		float x = Mathf.Abs(_transform.position.x)%this._config.GridSize;
+		float z = Mathf.Abs(_transform.position.z)%this._config.GridSize;
+		
+		float lower = this._config.GridSize-movingTolerance;
+		float upper = movingTolerance;
+		return  (x > lower  || x < upper)
+			&& (z > lower || z < upper);
+	}
+	private SnakeMover2States nextState;
 #region MovingRight
 
 
 
 	void MovingRight_EnterState () {
+		if (debug)
+			Debug.Log("Entering MovingRight State");
 		_transform.forward = Vector3.right;
-//		Debug.Log("Foward: "+_transform.forward);
+		Debug.Log("Right: " +_transform.position);
+		nextState = SnakeMover2States.MovingRight;
 	}
 	void MovingRight_Update() {
 		this.move();
+		
 		if (pressedUp())
-			currentState = SnakeMover2States.RightToUp;
+		{
+			nextState = SnakeMover2States.RightToUp;
+		}
 		if (pressedDown())
-			currentState = SnakeMover2States.RightToDown;
+			nextState = SnakeMover2States.RightToDown;
+
+
+	}
+	
+	void MovingRight_FixedUpdate() {
+		if (nextState != SnakeMover2States.MovingRight && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 	void MovingRight_ExitState () {
+		if (debug)
+			Debug.Log("Exiting MovingRightState");
+		_transform.position = new Vector3(Mathf.Round(_transform.position.x), _transform.position.y,Mathf.Round(_transform.position.z));
 	}
 #endregion
 #region RightToUp
 	void RightToUp_EnterState () {
+		if (debug)
+			Debug.Log("RightToUp");
 
 		_transform.forward = Vector3.forward;
 	}
 	void RightToUp_Update() {
-		this.currentState =  SnakeMover2States.MovingUp;
+		this.nextState =  SnakeMover2States.MovingUp;
 	}
 	void RightToUp_ExitState () {
+	}
+	void RightToUp_FixedUpdate() {
+		if (nextState != SnakeMover2States.RightToUp && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 #endregion
 #region RightToDown
 	void RightToDown_EnterState () {
+		if (debug)
+			Debug.Log("RightToDown");
 
 		_transform.forward = Vector3.back;
 	}
 	void RightToDown_Update() {
-		this.currentState =  SnakeMover2States.MovingDown;
+		this.nextState =  SnakeMover2States.MovingDown;
 	}
 	void RightToDown_ExitState () {
+	}
+	void RightToDown_FixedUpdate() {
+		if (nextState != SnakeMover2States.RightToDown && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 #endregion
 #region MovingLeft
 	void MovingLeft_EnterState () {
-
-		Debug.Log ("Entering MovingLeft State");
+		Debug.Log("Left: " +_transform.position);
+		if (debug)
+			Debug.Log ("Entering MovingLeft State");
 	}
 	void MovingLeft_Update() {
 		this.move();
 		if (pressedUp())
-			currentState = SnakeMover2States.LeftToUp;
+			nextState = SnakeMover2States.LeftToUp;
 		if (pressedDown())
-			currentState = SnakeMover2States.LeftToDown;
+			nextState = SnakeMover2States.LeftToDown;
 
 	}
 	void MovingLeft_ExitState () {
-		Debug.Log ("Exiting MovingLeft State");
+		if (debug)
+			Debug.Log ("Exiting MovingLeft State");
+		_transform.position = new Vector3(Mathf.Round(_transform.position.x), _transform.position.y,Mathf.Round(_transform.position.z));
+	}
+	void MovingLeft_FixedUpdate() {
+		if (nextState != SnakeMover2States.MovingLeft && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 #endregion
 #region LeftToUp
 	void LeftToUp_EnterState () {
+		if (debug)
+			Debug.Log("LeftToUp");
 
 		_transform.forward = Vector3.forward;
 //		Debug.Log("New Foward: " +_transform.forward);
 	}
 	void LeftToUp_Update() {
-		this.currentState =  SnakeMover2States.MovingUp;
+		this.nextState =  SnakeMover2States.MovingUp;
 	}
 	void LeftToUp_ExitState () {
+	}
+	void LeftToUp_FixedUpdate() {
+		if (nextState != SnakeMover2States.LeftToUp && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 #endregion
 #region LeftToDown
 	void LeftToDown_EnterState () {
+		if (debug)
+			Debug.Log("LeftToDown");
 
 		_transform.forward = Vector3.back;
 	}
 	void LeftToDown_Update() {
-		this.currentState =  SnakeMover2States.MovingDown;
+		this.nextState =  SnakeMover2States.MovingDown;
 	}
 	void LeftToDown_ExitState () {
 	}
+	void LeftToDown_FixedUpdate() {
+		if (nextState != SnakeMover2States.LeftToDown && this.AtTurningPosition())
+			this.currentState = nextState;
+	}
 #endregion
+
 #region MovingUp
 	void MovingUp_EnterState () {
-		Debug.Log("MovingUp");
+		Debug.Log("Up: " +_transform.position);
+		if (debug)
+			Debug.Log("Entering MovingUp State");
+		
+		
 	}
 	void MovingUp_Update() {
 		this.move();
+		
 		if (pressedLeft())
-			this.currentState = SnakeMover2States.UpToLeft;
+			this.nextState = SnakeMover2States.UpToLeft;
 		if (pressedRight())
-			this.currentState = SnakeMover2States.UpToRight;
+			this.nextState = SnakeMover2States.UpToRight;
 
 
 	}
 	void MovingUp_ExitState () {
+		if (debug)
+			Debug.Log("Exiting MovingUp State");
+		_transform.position = new Vector3(Mathf.Round(_transform.position.x), _transform.position.y,Mathf.Round(_transform.position.z));
+	}
+	void MovingUp_FixedUpdate() {
+		if (nextState != SnakeMover2States.MovingUp && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 #endregion
 #region UpToLeft
 void UpToLeft_EnterState () {
-
-	_transform.forward = Vector3.left;
-//		Debug.Log("New Foward: " +_transform.forward);
+//		StartCoroutine(WaitSomeTime());
+		
+		if (debug)
+			Debug.Log("UpToLeft");
+		
+		
+			_transform.forward = Vector3.left;
+	
 }
 void UpToLeft_Update() {
-	this.currentState =  SnakeMover2States.MovingLeft;
+		
+		this.nextState =  SnakeMover2States.MovingLeft;
+	
 }
 void UpToLeft_ExitState () {
 }
+	void UpToLeft_FixedUpdate() {
+		if (nextState != SnakeMover2States.UpToLeft && this.AtTurningPosition())
+			this.currentState = nextState;
+	}
 #endregion
 #region UpToRight
 	void UpToRight_EnterState () {
+		if (debug)
+			Debug.Log("UpToRight");
 
 		_transform.forward = Vector3.right;
 	}
 	void UpToRight_Update() {
-		this.currentState =  SnakeMover2States.MovingRight;
+		this.nextState =  SnakeMover2States.MovingRight;
 	}
 	void UpToRight_ExitState () {
+	}
+	void UpToRight_FixedUpdate() {
+		if (nextState != SnakeMover2States.UpToRight && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 #endregion
 #region MovingDown
 	void MovingDown_EnterState () {
-
-		Debug.Log ("Entering MovingDown State");
+		Debug.Log("Down: " +_transform.position);
+		if (debug)
+			Debug.Log ("Entering MovingDown State");
+//		nextState = SnakeMover2States.MovingDown;
 	}
 	void MovingDown_Update() {
 		this.move();
 		if (pressedLeft())
-			this.currentState = SnakeMover2States.DownToLeft;
+			this.nextState = SnakeMover2States.DownToLeft;
 		if (pressedRight())
-			this.currentState = SnakeMover2States.DownToRight;
+			this.nextState = SnakeMover2States.DownToRight;
 
 	}
 	void MovingDown_ExitState () {
-		Debug.Log ("Exiting MovingDown State");
+		if (debug)
+			Debug.Log ("Exiting MovingDown State");
+		_transform.position = new Vector3(Mathf.Round(_transform.position.x), _transform.position.y,Mathf.Round(_transform.position.z));
+	}	
+	void MovingDown_FixedUpdate() {
+		if (nextState != SnakeMover2States.MovingDown && this.AtTurningPosition())
+			this.currentState = nextState;
 	}
 #endregion
 #region DownToLeft
 void DownToLeft_EnterState () {
+		if (debug)
+			Debug.Log("DownToLeft");
 
 	_transform.forward = Vector3.left;
 //		Debug.Log("New Foward: " +_transform.forward);
 }
 void DownToLeft_Update() {
-	this.currentState =  SnakeMover2States.MovingLeft;
+	this.nextState =  SnakeMover2States.MovingLeft;
 }
 void DownToLeft_ExitState () {
 }
+	void DownToLeft_FixedUpdate() {
+		if (nextState != SnakeMover2States.DownToLeft && this.AtTurningPosition())
+			this.currentState = nextState;
+	}
 #endregion
 #region DownToRight
 	void DownToRight_EnterState () {
+		if (debug)
+			Debug.Log("DownToRight");
 
 		_transform.forward = Vector3.right;
 	}
 	void DownToRight_Update() {
-		this.currentState =  SnakeMover2States.MovingRight;
+		nextState = SnakeMover2States.MovingRight;
 	}
 	void DownToRight_ExitState () {
 	}
+	void DownToRight_FixedUpdate() {
+		if (nextState != SnakeMover2States.DownToRight && this.AtTurningPosition())
+			this.currentState = nextState;
+	}
+
 #endregion
 
 
